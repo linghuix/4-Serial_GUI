@@ -1,5 +1,14 @@
 function varargout = serial_GUI(varargin)
-
+global AAA
+AAA=[
+  660 730 1050 1160 1180 1180 895 730;
+  650 870 1080 1150 1180 1180 890 723;
+  650 840 1080 795 1180 1180 890 730;
+  645 867 780 1150 1137 1180 890 730;
+  660 867 1080 1111 1180 850 890 730;
+  715 820 1145 1157 850 1183 850 727;
+  725 870 1147 1160 1185 1100 890 650;
+  715 860 1145 1160 1185 1185 780 730];
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -14,11 +23,13 @@ if nargin && ischar(varargin{1})
 end
 
 if nargout
-    [varargout{1:nargout}] = gu_mainfcn(gui_State, varargin{:});
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
     gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
+
+
 
 % --- Executes just before serial_GUI is made visible.
 function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
@@ -27,19 +38,18 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     % varargin   command line arguments to serial_GUI (see VARARGIN)
-   
+
     clc
     clear COM rate Stopbit Databit terminator command maxNum J K pause h t h2 
     tic
-    cd 'D:\1-embed\4-Serial_GUI\1-Arduino 展示'
-    % COM串口号，rate 波特率, Stopbit停止位，Databit数据位
-    % command采样命令，savename保存文件名
-    % J、K 传感器序号
+    % COM串口号，rate 波特率 Stopbit停止位，Databit数据位    
+    % command采样命令，savename保存文件名    
+    % J、K 传感器序号    
     global COM rate Stopbit Databit terminator command
-    global maxNum J K h h2
+    global maxNum J K
     global pause showfigure t
-%     h2
-    % 默认值
+    
+    % 默认值初始化
     pause = 1;
     COM = 'COM3';
     rate = 115200;
@@ -47,28 +57,30 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     Databit = 8;
     terminator = 'LF';
     command = 'start';
-    maxNum = 256;
+    maxNum = 2000;
     J = 1;K = 1;
     showfigure = 0;
 
-%     t = timer('period',1,'executionmode','fixedrate','busymode','queue');
-%     t.TimerFcn  = {@my,handles};
+    % 定时器设置
+    t = timer('period',1,'executionmode','fixedrate','busymode','queue');
+    t.TimerFcn  = {@my,handles};
     
+    % 初始化成功！    
     set(handles.popCOM,'value',3);
     set(handles.popRate,'value',4);
     set(handles.popStopbit,'value',1);
     set(handles.popDatabit,'value',4);
     set(handles.terminator,'value',2);
-    set(handles.maxNum,'value',6);
+    set(handles.maxNum,'value',2);
 
     fprintf('*****************************************\n');
-    fprintf('欢迎使用Arduino Serial_GUI！\n');
-    fprintf('Author——Linghui Xu\n');
-    fprintf('Product Time——2019.04.02\n');
+    fprintf('欢迎使用ARM Serial_GUI！\n');
+    fprintf('Author—Linghui Xu\n');
+    fprintf('Product Time—2019.04.02\n');
     fprintf('*****************************************\n');
 
     %初始化界面
-    %设置方法为，string属性数组中的下标，从1开始
+    %设置方法为，string数组中的下标，从1开始
     set(handles.HighLevel,'value',1);
     % set(handles.interrupt,'visible','off');
     % set(handles.text9,'visible','off');
@@ -90,9 +102,8 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
 
     % set(handles.figure,'ytick',0:100:1024,'xtick',0:100:1500);
     % set(handles.figure, 'XTick', 0:10:1500); 
-    % set(handles.figure, 'XTickLabel' ,{'a','b','c'}) ; %将上面的三个刻度值改为a,b,c。
-    
-    set(handles.st, 'String', '初始化成功！')
+    % set(handles.figure, 'XTickLabel' ,{'a','b','c'}) ; %将上面的三个刻度值改为a,b,c    
+    set(handles.st, 'String', '初始化成功！,默认选择传感器块(1,1)')
 
     % Choose default command line output for serial_GUI
     handles.output = hObject;
@@ -102,13 +113,16 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
 
     % UIWAIT makes serial_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
-
-% function my(mtimer,event,handles)
-%         global after J K
-% %         J
-% %         mtimer
-% %         handles
-%         set(handles.st,'String',num2str(after(J,K,end)));
+    
+    
+function my(mtimer,event,handles)
+        global after J K
+%         J
+%         mtimer
+%         handles
+        if(after ~= [])
+            set(handles.st,'String',num2str(after(J,K,end)));
+        end
 
 function varargout = serial_GUI_OutputFcn(hObject, eventdata, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
@@ -118,6 +132,7 @@ function varargout = serial_GUI_OutputFcn(hObject, eventdata, handles)
 
     % Get default command line output from handles structure
     varargout{1} = handles.output;
+
 
 
 function edit2_Callback(hObject, eventdata, handles)
@@ -150,226 +165,156 @@ function pushbutton6_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in OpenSerial.
-function OpenSerial_Callback(hObject, eventdata,handles)
+function OpenSerial_Callback(~, ~,handles)
     % hObject    handle to OpenSerial (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     
-        set(handles.st, 'String', '打开串口')
+    set(handles.st, 'String', '打开串口，删除旧的存储数据')
     
     %%如果matlab已经打开了串口，关闭它，防止占用
     if ~isempty(instrfind)
          fclose(instrfind);
          delete(instrfind);
-         fprintf('关闭matlab已经打开了串口: %s \n',instrfind);
+         fprintf('关闭matlab已经打开了串口 %s \n',instrfind);
     end
 
-    global COM rate Stopbit terminator
+    global COM rate Stopbit terminator 
     global s x x1 y1 wcold maxNum
-    global wc Ts data after bbb wcmin h h2
+    global wc Ts data after bbb wcmin h h2 t    %t定时器
     
     data = [];
     after = [];
-    
+
     % h2 是删除的句柄，虽然删除了句柄，但是指向的对象的变量还是存在的
-    % 因此，需要用isvalid判断，是否是有效的句柄
+    % 因此，需要用isvalid判断，是否是有效的句柄    
     if (isempty(h2))
         h  = animatedline('MaximumNumPoints',maxNum,'Color',[1 0 0]);
         h2 = animatedline('MaximumNumPoints',maxNum,'Color',[0 0 0]);
-        fprintf('create h and h2');
+        fprintf('create h and h2 \n');
     elseif (~isvalid(h2))
         h  = animatedline('MaximumNumPoints',maxNum,'Color',[1 0 0]);
         h2 = animatedline('MaximumNumPoints',maxNum,'Color',[0 0 0]);
-        fprintf('create h and h2');
+        fprintf('create h and h2 \n');
     else
         clearpoints(h);
         clearpoints(h2);
         fprintf('clearpoints \n');
     end
-    
+
     %axis(handles.figure,[0 1500 0 1024]);
 
+    %傅里叶变换，间隔tt
+    tt = 10;
     % 数字滤波器缓存区
     x  = [];
-    x1 = zeros(8,8);    %滞后一阶的
-    y1 = zeros(8,8);    %滞后一阶
+    x1 = zeros(8,8);    %滞后
+    y1 = zeros(8,8);    %滞后
 
-    % 数字滤波器的参数，wc为截止频率，wcmin为初始化截止频率。Ts为采样周期
+    % 数字滤波器的参数，wc为截止频率，wcmin为初始化截止频率。Ts为采样周期    
     wcold = 5*2*pi;
-    wc = 2*2*pi;wcmin = wc;
-    Ts = 1/30;
+    wc = 4;wcmin = wc;
+    Ts = 1/50;
 
     % 传感器数据存储区
     data = [];
-    % 滤波后
+    % 滤波后的数据
     after = [];
 
     bbb=[];
 
     s = serial(COM);         %定义串口对象
-    set(s,'BaudRate',rate);  %设置波特率
+    set(s,'BaudRate',rate);  %设置波特率    
     s.parity = 'none';       %设置校验位无奇偶校验，默认none
     s.stopbits = Stopbit;    %设置停止位，默认1
     s.Terminator = terminator;
-    s.inputbuffersize = 512;  %设置输入缓冲区,缺省值为512b 
+    s.inputbuffersize = 1024;  %设置输入缓冲区，缺省值为512b 
     
-    % 设置中断响应模式（有“byte”和“Terminator”两种模式可选，“byte”是达到一定字节数产生中断，“Terminator”可用作键盘某个按键事件来产生中断）
-    s.BytesAvailableFcnMode = 'terminator';
-    s.BytesAvailableFcn = {@ReceiveCallback, handles};
-    
+    % 设置中断响应模式（有“byte”和“Terminator”两种模式可选，“byte”是达到设定的字节数产生中断，“Terminator”可用作键盘某个按键事件来产生中断）
+    s.BytesAvailableFcnMode = 'byte';
+    s.BytesAvailableFcnCount = 128;
+    s.BytesAvailableFcn =  {@ReceiveCallback,handles};
     
     fopen(s);                  %打开串口对象s
     fprintf('打开串口: %s \n',s.Port);
     
+    % ASCII码形式发送
+    fwrite(s,'start','char');
+ 
 %     if (~isvalid(t))
-        
 %     end
    
-%     start(t);
-    
-
-%     file = 'H:\4-mymovies\own\外骨骼渲染.mp4';
-%     playVideo(file);
+    start(t);
         
 
 function ReceiveCallback( ~, ~,handles)
-    global s
-    global x x1 y1 wc Ts data after wcmin h h2
+
+    global x 
     global J K
     global pause
     
-    b = fgetl(s);
-    b = str2num(b);           %用函数fget(s)从缓冲区读取串口数据，当出现终止符（换行符）停止。
-                                %所以在Arduino程序里要使用Serial.println()
-                                %如果不是数字而是汉字，比如“这是6”，将返回[]
-    if( isempty(b) )            %检验是否是[]，因为每次scan前，都会输出汉字，参考arduino中程序
-        if(size(x,1) == 8)      %经验x是否是8*8的
-                %toc;
-%             W = x 化为证实的受力，单位为g
-%             x = 1000*(x - 140*ones(8,8))./A;
+    global s
+    global x1 y1 wc Ts data after  wcmin h h2
 
-%                 % 实际传感器数据存储区
-%                 if (size(data,3) >= 200)    %此时size = 200
-%                     All_data = cat(3,All_data,data(:,:,end-189:end)); 
-%                     size(All_data,3)
-%                     %保存采样数据的后190个。舍弃前10个
-%                     data = data(:,:,end-9:end);
-%                     %保留后10个，这样一来，下次保存就会自动舍弃这50个已经记录的数据
-%                 else
-                data = cat(3,data,x);
-%                 end
+    recivedata = fread (s,128)';
+    high = recivedata(2:2:128);                         %取高位 
+    low = recivedata(1:2:128);                                                                    %取底位
+%     x = (high*256+low)*3.3/4095;
+    x = (high*256+low);
+    %由于实际的ADC采样的电压值比较小，所以并没有化为单位伏特
+    x = reshape(x,8,8)';
+    data = cat(3,data,x);
+    %data(1,1,:);
 
+    % 滤波器核心代码，y滤波后的数据 %
+    y = (wc*(x+x1)-(wc-2/Ts)*y1)/(2/Ts+wc);
+    after = cat(3,after,y);                                                                         % 滤波输出
 
-            % 滤波器核心代码，y滤波后的数据
-            y = (wc*(x+x1)-(wc-2/Ts)*y1)/(2/Ts+wc);
+%             speed = abs(y(1,1)-x(1,1));
+%             speed = abs(x1(1,1)-x(1,1));
+    speed = abs(y-x);                                                                              % 修改为采样值与滤波后得到的前一刻的差值
+%             speed = abs(x1-x);
+    speedmax = max(max(speed));                                                                      % 速度最大240左右,情况pi*beta/22,wcmin =4; 截止频率变化范围 5-15Hz
+    pi_2_beta = 0.05;
 
-%                 if (size(after,3) >= 200)  %此时size = 200
-%                     All_data_after = cat(3,All_data_after,after(:,:,end-189:end));  
-%                     %保存采样数据的后150个。舍弃前50个
-%                     after = after(:,:,end-9:end);
-%                     % 保留后50个，这样一来，下次保存就会自动舍弃这50个已经记录的数据
-%                 else
-                after = cat(3,after,y);% 滤波输出
-%                 end
+    wc = wcmin+speedmax*pi_2_beta;                                                                % 更新滤波截止频率
+    y1 = y; x1 = x; 
+    x = [];
 
-            speed1 = x-x1;               % 原本采用的是采样的前后差差值作为速度
-            speed2 = abs(x-y);           % 修改为采样值与滤波后得到的前一时刻的差值
-            speedmax1 = max(max(speed1)); % 速度最快200左右,一般情况下50，wcmin =2*2*pi; 截止频率变化范围 2-10Hz
-            speedmax2 = max(max(speed2));
-            speedmax = max(speedmax1,speedmax2);
-            beta = 1/6;
-
-            % 更新滤波截止频率
-            wc = wcmin+speedmax*beta*2*pi;
-            if(wc>20*pi) wc = 20*pi;
-            end
-%             wc/2/pi
-            % 更新
-            y1 = y;x1 = x;
-            % clear x
-            x = [];
-
-            length_data = size(data(J,K,:),3);
-            
-            %%plot figure
-            if(pause)
-                addpoints(h, length_data,[data(J,K,end)]);
-                addpoints(h2,length_data,[after(J,K,end)]);
-                drawnow limitrate
-            end
-            
-%        %% gait analysis  ，第一次测试的时候耗时比较长，第二次之后就会快许多，能够实现实时的曲线变化
-%        
-%             Fs = 30;
-%             % 多个传感器块串起来
-%             Row = [1 2 3 4 5 3 4 5 2 6 4 5 7 5 7 8];
-%             Col = [7 7 7 7 7 6 6 6 5 5 4 4 4 3 3 1];
-%             merge_R = [8 7 7];
-%             merge_C = [2 1 2];
-%         
-%             coef = [];  
-%             
-%         if (mod(length_data,256) == 0)
-%             tic;
-% %             cd ' D:\1-embed\4-Serial_GUI'
-% 
-%             % 多个传感器块串起来
-%             for row_col = 1:length(Row) 
-% 
-%                 row = Row(row_col);
-%                 col = Col(row_col);
-%                 
-%                 if row == 8
-%                     ser = reshape(after(row,col,end-256+1:end),1,256);% 某个传感器的时间序列
-%                     serial = ser/mean(ser);
-%                 else
-%                     ser = reshape(after(row,col,end-256+1:end),1,256);% 某个传感器的时间序列
-%                     for ii = 1:length(merge_R)
-%                         ser = ser + reshape(after(merge_R(ii),merge_C(ii),end-256+1:end),1,256);
-%                     end
-%                     ser = ser/4;
-%                     serial = ser/mean(ser);
-%                 end
-%                 
-%                 %%傅里叶系数计算
-%                 NFFT = 256;                                                 % 频率图的点数
-%                 A = abs(fft(serial,NFFT));                                  % 频域幅值
-%                 f = Fs/2*linspace(0, 1, NFFT/2);                            % 采样点数决定了频率分辨力
-%                 A_f = [A(1) 2*A(2:NFFT/2)]./NFFT;
-% 
-%                 temp = [sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
-%                 coef = [coef temp];                                         % 多个传感器块串起来
-%             end
-% 
-%             result = Model_py(coef,'matlab')                 % 返回字符结果
-% %             result = Model_py(coef,'python') 
-%             fprintf('你的分类结果为%s',char(result));
-%             toc
-%             set(handles.st, 'String', result);
-%         end
-
-        else
-            %%warning1 串口得到的数据并不是8*8的
-            disp('warning1');
-            x = [];
-        end
-
-        
-    else
-        if size(b,2) == 8
-            x = [x;b];          %存储数据
-        else
-            %  实验中发现，b得到的有可能是残缺的，即不是8个传感器的数据。导致无法试实现[x;b]运算
-            %  可能与串口传输底层有关
-            % 'warning2 b不是8位的向量
-            fprintf('warning2');
-        end
+%           % 图像显示
+    length_data = size(data(J,K,:),3);
+    
+    if(pause)
+        addpoints(h, length_data,[data(J,K,end)]);
+        addpoints(h2,length_data,[after(J,K,end)]);
+        drawnow limitrate
     end
+    
+    % 打印数据
+    data(J,K,end)
+    
+    %% gait analysis
+    if (mod(length_data,256) == 0)
+        
+        Avr = 256;
+        SUM = 0;
+        
+        for j = 0:(Avr-1)
+            SUM = SUM + after(:,:,end-j);
+        end
+        avr = SUM/Avr;
+        sample = reshape(avr,1,64);
+        
+        result = Model_py(sample)                 % 返回字符结果
+        set(handles.st, 'String', result);
+    end
+   
+
 
 
     
 % --- Executes on selection change in popCOM.
-function popCOM_Callback(hObject, ~, handles)
+function popCOM_Callback(hObject, ~, ~)
     % hObject    handle to popCOM (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -457,7 +402,7 @@ function popRate_Callback(hObject, eventdata, handles)
         case 4
             rate=115200;
             set(handles.st, 'String', '成功设置波特率为115200')
-    end %此处的end是switch的
+    end %此处的end是switch
     %fprintf('成功设置波特率为 %d \n',rate);
 
 
@@ -519,34 +464,26 @@ function ShowFiliteredCurve_Callback(hObject, eventdata, handles)
     end
 
 % --- Executes on button press in CloseSerial.
-function CloseSerial_Callback(hObject, ~, handles)
+function CloseSerial_Callback(~, ~, handles)
     % hObject    handle to CloseSerial (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    
     global s COM t
+    
+    fwrite(s,'close','char');
     fclose(s);
     delete(s);
     
-%     stop(t);
-%     delete(t);
-%     clear(t);
+    stop(t);
 
     % clearpoints(h);
     % clearpoints(h2);
     % data = [];
     % after = [];
-    % clearpoints(h);
     
-    set(handles.st, 'String', 'Close COM')
-    %fprintf('Close %s \n',COM);
+    set(handles.st, 'String', 'Close COM，数据还是保存着哦')
+    fprintf('Close %s \n',COM);
 
-
-% --- Executes on button press in sendData.
-function sendData_Callback(hObject, eventdata, handles)
-    % hObject    handle to sendData (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
 
 
 
@@ -601,8 +538,6 @@ function maxNum_Callback(hObject, eventdata, handles)
             maxNum = 4000;
         case 5
             maxNum = 5000;
-        case 6
-            maxNum = 256;
     end
 
     if (~isempty(h2))
@@ -612,7 +547,7 @@ function maxNum_Callback(hObject, eventdata, handles)
     end
 
     set(handles.st, 'String','成功设置最大接收数据')
-    %fprintf('成功设置最大接收数据为 %d \n',maxNum);
+    fprintf('成功设置接收数据%d \n',maxNum);
 
 
 
@@ -820,18 +755,21 @@ end
 
 
 % --- Executes on button press in SaveData.
-function SaveData_Callback(hObject, eventdata, handles)
+function SaveData_Callback(~, ~, handles)
     % hObject    handle to SaveData (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    cd 'F:\1-embed\4-Serial_GUI\fig'
+    cd 'D:\1-embed\5-ARM\Small_50Hz_fig'
+    
     global savename h 
     global data after 
+    
     time = toc;
     [x,y] = getpoints(h);
     save( strcat([savename '_' datestr(now,30)],'.mat'),'data','after','y');
-    set(handles.st,'String','保存成功！');
+    set(handles.st,'String','保存成功＿');
+    cd 'D:\1-embed\4-Serial_GUI\2-ARM小体积'
 
 
 
@@ -845,7 +783,7 @@ function SaveName_Callback(hObject, eventdata, handles)
 
     global savename
     savename = get(hObject,'String')
-    set(handles.st,'String','文件名称成功更改');
+    set(handles.st,'String','名称成功更改');
 
 % --- Executes during object creation, after setting all properties.
 function SaveName_CreateFcn(hObject, eventdata, handles)
@@ -1076,6 +1014,13 @@ function figure_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate figure
+% ha=axes('units','normalized','position',[0 0 1 1]);
+% uistack(ha,'down')
+% II=imread('bb.jpg');
+% image(II)
+% colormap gray
+% set(ha,'handlevisibility','off','visible','off');
+
 
 
 % --- Executes on button press in radiobutton9.
@@ -1090,7 +1035,7 @@ function radiobutton9_Callback(hObject, eventdata, handles)
     if (val)
         fprintf('接收数据')
     else
-        fprintf('不接收数据')
+        fprintf('不接收数捠')
     end
 
 
@@ -1151,12 +1096,12 @@ function pause_Callback(hObject, ~, handles)
     % handles    structure with handles and user data (see GUIDATA)
 
     global pause t
-%     t
-%     stop(t)
+    t
+    stop(t)
     set(handles.reStart,'visible','on');
     set(hObject,'visible','off');
     pause = 0;
-    set(handles.st,'String','pause');
+    set(handles.st,'String','停止绘图,后台还在采集数据哦');
     
 
 % --- Executes on button press in reStart.
@@ -1169,12 +1114,13 @@ function reStart_Callback(hObject, ~, handles)
     
     set(handles.pause,'visible','on');
     set(hObject,'visible','off');
-
+    
     clearpoints(h);
     clearpoints(h2);
-%     start(t);
+    start(t);
+
     pause = 1;
-    set(handles.st,'String','reStart');
+    set(handles.st,'String','重新开始绘图，数据依旧在采集哦');
 
 % --- Executes on button press in showfigure.
 function showfigure_Callback(hObject, eventdata, handles)
@@ -1184,20 +1130,20 @@ function showfigure_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of showfigure
 
-global data h2
+global h2 AAA after
 
 figure(5)
+
     [x,y] = getpoints(h2);
     loops = size(x,2)
-    F(loops) = struct('cdata',[],'colormap',[]);
-    for j = 1:loops
-        imshow(imresize(data(:,:,j),100,'nearest'),[250 800]); 
-        drawnow limitrate%         
-        %F(j) = getframe;
-    end
     
-%     movie(F)
-    close figure 5
+    for j = 1:2:loops
+        fprintf('frame %d\n',round(j));
+        imshow(imresize(after(:,:,j)-AAA,50,'nearest'),[-10 200]); 
+        drawnow limitrate         
+    end
+
+close figure 5
 
 
 
@@ -1213,3 +1159,23 @@ function st_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to st (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% ha=axes('units','normalized','position',[0 0 1 1]);
+% uistack(ha,'down')
+% II=imread('bb.jpg');
+% image(II)
+% colormap gray
+% set(ha,'handlevisibility','off','visible','off');
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over showfigure.
+
+
+% --- Executes on key press with focus on showfigure and none of its controls.

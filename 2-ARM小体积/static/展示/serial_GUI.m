@@ -1,14 +1,14 @@
 function varargout = serial_GUI(varargin)
+global AAA
 AAA=[
-  660 570 1050 1160 1180 1180 895 730;
-  650 570 1080 1150 1180 1180 890 723;
-  650 570 1080 795 1180 1180 890 730;
-  645 570 780 1150 1137 1180 890 730;
-  660 570 1080 1111 1180 850 890 730;
-  715 820 1145 1157 850 1183 850 727;
+  720 730 1150 1160 1180 1180 895 730;
+  670 870 1060 1150 1180 1180 890 723;
+  720 840 1150 795 1180 1180 890 730;
+  722 867 840 1150 1137 1180 890 730;
+  715 870 1150 1111 1180 850 890 730;
+  715 870 1145 1157 850 1183 850 727;
   725 870 1147 1160 1185 1100 890 650;
-  715 860 1145 1160 1185 1185 780 730;
-]
+  715 870 1145 1160 1185 1185 780 730];
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -44,7 +44,8 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     tic
     % COM串口号，rate 波特率 Stopbit停止位，Databit数据位    
     % command采样命令，savename保存文件名    
-    % J、K 传感器序号    global COM rate Stopbit Databit terminator command
+    % J、K 传感器序号    
+    global COM rate Stopbit Databit terminator command
     global maxNum J K
     global pause showfigure t
     
@@ -169,7 +170,7 @@ function OpenSerial_Callback(~, ~,handles)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     
-    set(handles.st, 'String', '打开串口')
+    set(handles.st, 'String', '打开串口，删除旧的存储数据')
     
     %%如果matlab已经打开了串口，关闭它，防止占用
     if ~isempty(instrfind)
@@ -181,6 +182,7 @@ function OpenSerial_Callback(~, ~,handles)
     global COM rate Stopbit terminator 
     global s x x1 y1 wcold maxNum
     global wc Ts data after bbb wcmin h h2 t    %t定时器
+    
     data = [];
     after = [];
 
@@ -250,8 +252,8 @@ function ReceiveCallback( ~, ~,handles)
     global x 
     global J K
     global pause
-    
-    global s
+     
+    global s AAA
     global x1 y1 wc Ts data after  wcmin h h2
 
     recivedata = fread (s,128)';
@@ -289,39 +291,26 @@ function ReceiveCallback( ~, ~,handles)
     end
     
     % 打印数据
-    data(J,K,end)
+%     data(J,K,end)
+    
+    
     
     %% gait analysis
     if (mod(length_data,256) == 0)
-        Fs = 50;
-        coef = [];
         
-        % 多个传感器块串起来        
-        Row = [8 8 7 7 1   1 2 3 4 5 6];
-        Col = [1 2 1 2 7   8 7 6 5 4 3];
-        for row_col = 1:length(Row) 
-                
-            row = Row(row_col);
-            col = Col(row_col);
-            
-            serial = reshape(after(row,col,end-256+1:end),1,256);       % 某个传感器的时间序列
-            serial = serial/mean(serial);
-            %%傅里叶系数计算
-            NFFT = 256;                                                 % 频率图的点数
-            A = abs(fft(serial,NFFT));                                  % 频域幅值
-            f = Fs/2*linspace(0, 1, NFFT/2);                            % 采样点数决定了频率分辨力
-            A_f = [A(1) 2*A(2:NFFT/2)]./NFFT;
-            
-            temp = [A_f(f == 0) sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
-            coef = [coef temp];                                         % 多个传感器块串起来        
+        Avr = 256;
+        SUM = 0;
+        
+        for j = 0:(Avr-1)
+            SUM = SUM + after(:,:,end-j)-AAA;
         end
+        avr = SUM/Avr;
+        sample = reshape(avr,1,64);
         
-        result = Model_py(coef)                 % 返回字符结果
+        result = Model_py(sample)                 % 返回字符结果
         set(handles.st, 'String', result);
     end
-
-
-
+   
     
 % --- Executes on selection change in popCOM.
 function popCOM_Callback(hObject, ~, ~)
@@ -490,17 +479,10 @@ function CloseSerial_Callback(~, ~, handles)
     % clearpoints(h2);
     % data = [];
     % after = [];
-    % clearpoints(h);
     
-    set(handles.st, 'String', 'Close COM')
+    set(handles.st, 'String', 'Close COM，数据还是保存着哦')
     fprintf('Close %s \n',COM);
 
-
-% --- Executes on button press in sendData.
-function sendData_Callback(hObject, eventdata, handles)
-    % hObject    handle to sendData (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
 
 
 
@@ -786,7 +768,7 @@ function SaveData_Callback(~, ~, handles)
     [x,y] = getpoints(h);
     save( strcat([savename '_' datestr(now,30)],'.mat'),'data','after','y');
     set(handles.st,'String','保存成功＿');
-    cd 'D:\1-embed\4-Serial_GUI\2-ARM小体积'
+    cd 'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\展示'
 
 
 
@@ -800,7 +782,7 @@ function SaveName_Callback(hObject, eventdata, handles)
 
     global savename
     savename = get(hObject,'String')
-    set(handles.st,'String','文件名称成功更改');
+    set(handles.st,'String','名称成功更改');
 
 % --- Executes during object creation, after setting all properties.
 function SaveName_CreateFcn(hObject, eventdata, handles)
@@ -1118,7 +1100,7 @@ function pause_Callback(hObject, ~, handles)
     set(handles.reStart,'visible','on');
     set(hObject,'visible','off');
     pause = 0;
-    set(handles.st,'String','pause');
+    set(handles.st,'String','停止绘图,后台还在采集数据哦');
     
 
 % --- Executes on button press in reStart.
@@ -1137,7 +1119,7 @@ function reStart_Callback(hObject, ~, handles)
     start(t);
 
     pause = 1;
-    set(handles.st,'String','reStart');
+    set(handles.st,'String','重新开始绘图，数据依旧在采集哦');
 
 % --- Executes on button press in showfigure.
 function showfigure_Callback(hObject, eventdata, handles)
@@ -1147,20 +1129,20 @@ function showfigure_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of showfigure
 
-global data h2
+global h2 AAA after
 
 figure(5)
+
     [x,y] = getpoints(h2);
     loops = size(x,2)
-    F(loops) = struct('cdata',[],'colormap',[]);
-    for j = 1:loops
-        imshow(imresize(data(:,:,j)-AAA,100,'nearest'),[-10 300]); 
-        drawnow limitrate         
-        %F(j) = getframe;
-    end
     
-%     movie(F)
-    close figure 5
+    for j = 1:10:loops
+        fprintf('frame %d\n',round(j));
+        imshow(imresize(after(:,:,j)-AAA,50,'nearest'),[-10 200]); 
+        drawnow limitrate         
+    end
+
+close figure 5
 
 
 
@@ -1183,12 +1165,12 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-ha=axes('units','normalized','position',[0 0 1 1]);
-uistack(ha,'down')
-II=imread('bb.jpg');
-image(II)
-colormap gray
-set(ha,'handlevisibility','off','visible','off');
+% ha=axes('units','normalized','position',[0 0 1 1]);
+% uistack(ha,'down')
+% II=imread('bb.jpg');
+% image(II)
+% colormap gray
+% set(ha,'handlevisibility','off','visible','off');
 
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.

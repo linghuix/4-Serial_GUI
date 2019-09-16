@@ -12,7 +12,7 @@ Label = {'NORMAL' 'TOEIN' 'TOEOUT' 'PING' 'GAO' 'ABNORMAL','STATIC'};
 % tranNum = 300;  % 训练数据量 泛化能力差
 
 %%
-cd 'D:\1-embed\4-Serial_GUI\1-Arduino 展示'
+cd 'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\展示'
 
 s_feature = sprintfc('%g',feature);                         % 数字数组转化成字符串数组
 s = s_feature(1);
@@ -26,6 +26,6 @@ command = sprintf('python model.py "%s"',char(s));
 [status,cmdout] = system(command)                          % 等待python执行完毕
 result =Label{str2num(cmdout(end-4:end))+1};
 
-result = 'test...';
+% result = 'test...';
 end
 

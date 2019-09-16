@@ -21,9 +21,10 @@ if __name__=="__main__":
     
     ## 打开训练好的模型
     # model = open('ModelFile.txt','rb')
-    model = open('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\tmp\ModelFile_adult.txt','rb')
+    model = open(r'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\tmp\ModelFile.txt','rb')
     clf = pickle.load(model)           # 分类模型
-    print(clf)
+    # print(clf)
+    
     ## 预测
     result = clf.predict(data.reshape(1,-1))
     print(result)
