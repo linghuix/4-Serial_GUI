@@ -1,14 +1,14 @@
 function varargout = serial_GUI(varargin)
 global AAA
-AAA=[
-  720 730 1150 1160 1180 1180 895 730;
-  670 870 1060 1150 1180 1180 890 723;
-  720 840 1150 795 1180 1180 890 730;
-  722 867 840 1150 1137 1180 890 730;
-  715 870 1150 1111 1180 850 890 730;
-  715 870 1145 1157 850 1183 850 727;
-  725 870 1147 1160 1185 1100 890 650;
-  715 870 1145 1160 1185 1185 780 730];
+% AAA=[
+%   776（|干扰） 800(误差10%) 1120 1227 1252 1252 885 700;
+%   740 930 1135 1234 1125 1256 890 685;
+%   720 840 1150 795 1180 1180 890 730;
+%   722 867 840 1150 1137 1180 890 730;
+%   715 870 1150 1111 1180 850 890 730;
+%   715 870 1145 1157 850 1183 850 727;
+%   725 870 1147 1160 1185 1100 890 650;
+%   715 870 1145 1160 1185 1185 780 730];
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -47,7 +47,7 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % J、K 传感器序号    
     global COM rate Stopbit Databit terminator command
     global maxNum J K
-    global pause showfigure t
+    global pause showfigure flag_tell flag_data
     
     % 默认值初始化
     pause = 1;
@@ -60,10 +60,10 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     maxNum = 2000;
     J = 1;K = 1;
     showfigure = 0;
+    flag_tell = 0;
+    flag_data = 0;
 
-    % 定时器设置
-    t = timer('period',1,'executionmode','fixedrate','busymode','queue');
-    t.TimerFcn  = {@my,handles};
+
     
     % 初始化成功！    
     set(handles.popCOM,'value',3);
@@ -114,15 +114,7 @@ function serial_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % UIWAIT makes serial_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
     
-    
-function my(mtimer,event,handles)
-        global after J K
-%         J
-%         mtimer
-%         handles
-        if(after ~= [])
-            set(handles.st,'String',num2str(after(J,K,end)));
-        end
+
 
 function varargout = serial_GUI_OutputFcn(hObject, eventdata, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
@@ -241,15 +233,11 @@ function OpenSerial_Callback(~, ~,handles)
     % ASCII码形式发送
     fwrite(s,'start','char');
  
-%     if (~isvalid(t))
-%     end
-   
-    start(t);
         
 
 function ReceiveCallback( ~, ~,handles)
 
-    global x 
+    global x  flag_tell flag_data
     global J K
     global pause
      
@@ -291,12 +279,13 @@ function ReceiveCallback( ~, ~,handles)
     end
     
     % 打印数据
-%     data(J,K,end)
-    
+    if(flag_data && mod(length_data,10) == 0)
+        set(handles.st, 'String', num2str(data(J,K,end)));
+    end
     
     
     %% gait analysis
-    if (mod(length_data,256) == 0)
+    if ((mod(length_data,256) == 0) && flag_tell)
         
         Avr = 256;
         SUM = 0;
@@ -1146,35 +1135,40 @@ close figure 5
 
 
 
-% --- Executes during object deletion, before destroying properties.
 function showfigure_DeleteFcn(hObject, eventdata, handles)
-% hObject    handle to showfigure (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-
-% --- Executes during object creation, after setting all properties.
 function st_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to st (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-
-% --- Executes during object creation, after setting all properties.
 function figure1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-% ha=axes('units','normalized','position',[0 0 1 1]);
-% uistack(ha,'down')
-% II=imread('bb.jpg');
-% image(II)
-% colormap gray
-% set(ha,'handlevisibility','off','visible','off');
 
 
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over showfigure.
+
+% --- Executes on button press in radiobutton11.
+function radiobutton11_Callback(hObject, eventdata, handles)
+
+    global flag_tell
+    val = get(hObject,'Value');
+    
+    if (val)
+        fprintf('开始识别')
+        flag_tell = 1;
+    else
+        fprintf('关闭识别')
+        flag_tell = 0;
+    end
+    
+    
 
 
-% --- Executes on key press with focus on showfigure and none of its controls.
+% --- Executes on button press in radiobutton12.
+function radiobutton12_Callback(hObject, eventdata, handles)
+    global flag_data
+    val = get(hObject,'Value');
+    
+    if (val)
+        fprintf('开始识别')
+        flag_data = 1;
+    else
+        fprintf('关闭识别')
+        flag_data = 0;
+    end
