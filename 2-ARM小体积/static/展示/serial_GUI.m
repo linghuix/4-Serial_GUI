@@ -1,15 +1,19 @@
 function varargout = serial_GUI(varargin)
-global AAA
+global AAA sum_col
 % AAA=[
-%   776（|干扰） 800(误差10%) 1120 1227 1252 1252 885 700;
-%   740 930 1135 1234 1125 1256 890 685;
-%   720 840 1150 795 1180 1180 890 730;
-%   722 867 840 1150 1137 1180 890 730;
-%   715 870 1150 1111 1180 850 890 730;
+%   776（|干扰） 770(误差10%) 1120 1227 1252 1252 960 800;
+%   740 930 1126 1234 1250 1256 965 800;
+%   790 920（干扰大） 1200 950 1250 1250 960 790;
+%   780 944 930 1226 1250 1250 960 795;
+%   715 944 1150 1111 1180 850 890 730;
 %   715 870 1145 1157 850 1183 850 727;
 %   725 870 1147 1160 1185 1100 890 650;
 %   715 870 1145 1160 1185 1185 780 730];
 
+load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\AAA.mat');
+load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\sum_col.mat');
+AAA
+sum_col
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -173,7 +177,7 @@ function OpenSerial_Callback(~, ~,handles)
 
     global COM rate Stopbit terminator 
     global s x x1 y1 wcold maxNum
-    global wc Ts data after bbb wcmin h h2 t    %t定时器
+    global wc Ts data after bbb wcmin h h2     %t定时器
     
     data = [];
     after = [];
@@ -241,7 +245,7 @@ function ReceiveCallback( ~, ~,handles)
     global J K
     global pause
      
-    global s AAA
+    global s AAA sum_col
     global x1 y1 wc Ts data after  wcmin h h2
 
     recivedata = fread (s,128)';
@@ -285,9 +289,9 @@ function ReceiveCallback( ~, ~,handles)
     
     
     %% gait analysis
-    if ((mod(length_data,256) == 0) && flag_tell)
+    if ((mod(length_data,100) == 0) && flag_tell)
         
-        Avr = 256;
+        Avr = 20;
         SUM = 0;
         
         for j = 0:(Avr-1)
@@ -295,6 +299,11 @@ function ReceiveCallback( ~, ~,handles)
         end
         avr = SUM/Avr;
         sample = reshape(avr,1,64);
+        
+        sample = sample/sum(sample);
+%         for j = 1:Avr
+%            sample(j) =  sample(j)*100.0./sum_col(j);
+%         end
         
         result = Model_py(sample)                 % 返回字符结果
         set(handles.st, 'String', result);
@@ -456,13 +465,13 @@ function CloseSerial_Callback(~, ~, handles)
     % hObject    handle to CloseSerial (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    global s COM t
+    global s COM
     
     fwrite(s,'close','char');
+    
     fclose(s);
     delete(s);
-    
-    stop(t);
+
 
     % clearpoints(h);
     % clearpoints(h2);
@@ -748,7 +757,7 @@ function SaveData_Callback(~, ~, handles)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    cd 'D:\1-embed\5-ARM\Small_50Hz_fig'
+    cd 'D:\1-embed\4-Serial_GUI\fig_arm\Small_50Hz_fig'
     
     global savename h 
     global data after 
@@ -1083,9 +1092,8 @@ function pause_Callback(hObject, ~, handles)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    global pause t
-    t
-    stop(t)
+    global pause
+
     set(handles.reStart,'visible','on');
     set(hObject,'visible','off');
     pause = 0;
@@ -1098,14 +1106,14 @@ function reStart_Callback(hObject, ~, handles)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    global pause h h2 t
+    global pause h h2
     
     set(handles.pause,'visible','on');
     set(hObject,'visible','off');
     
     clearpoints(h);
     clearpoints(h2);
-    start(t);
+
 
     pause = 1;
     set(handles.st,'String','重新开始绘图，数据依旧在采集哦');
