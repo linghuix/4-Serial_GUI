@@ -8,6 +8,9 @@
 
 4. multi_training_model.py 调用*.mat，建立大量的分类模型进行评估，选择最优的训练模型，生成*.txt
 
+5. model_sample_test.py 进行不同数据集，相同算法的比较
+
+6. multi_training_model.py 进行不同算法，相同数据集的比较
 
 不同人的预测
 5. train_model_group.m/train_model_group.py 将同一个人的步态数据看成是一组，去预测另一组的数据，事实证明，该算法在这种情况下效果很烂。

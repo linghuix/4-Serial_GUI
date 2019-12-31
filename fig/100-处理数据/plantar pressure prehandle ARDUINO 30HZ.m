@@ -1,14 +1,14 @@
 %{
-åˆ†æï¼š
-1. å‰è„šæŒçš„å‹åŠ›æ³¢åŠ¨è¾ƒå°ï¼Œåè„šè·Ÿå—åŠ›è¾ƒå¤§ï¼Œæ³¢åŠ¨å‰§çƒˆ
-2. é€‰æ‹©æ¯”è¾ƒå®Œæ•´çš„è¶³åº•å‹åŠ›æ›²çº¿ index æ®µï¼Œå°†normalä¿å­˜åˆ°æœ¬åœ°ï¼Œè¯¥ç»“æ„ä½“åŒ…æ‹¬ é‡‡é›†æ—¶æ›²çº¿æ˜¾ç¤ºæ•°æ®yï¼Œæ»¤æ³¢æ•°æ®afterï¼ŒåŸå§‹æ•°æ®dataï¼Œindexæ•°æ®
+·ÖÎö£º
+1. Ç°½ÅÕÆµÄÑ¹Á¦²¨¶¯½ÏĞ¡£¬ºó½Å¸úÊÜÁ¦½Ï´ó£¬²¨¶¯¾çÁÒ
+2. Ñ¡Ôñ±È½ÏÍêÕûµÄ×ãµ×Ñ¹Á¦ÇúÏß index ¶Î£¬½«normal±£´æµ½±¾µØ£¬¸Ã½á¹¹Ìå°üÀ¨ ²É¼¯Ê±ÇúÏßÏÔÊ¾Êı¾İy£¬ÂË²¨Êı¾İafter£¬Ô­Ê¼Êı¾İdata£¬indexÊı¾İ
 %}
 
-A = load('D:\1-embed\3-ARDUINO\test_flexforce\flexforce_precise\coef_4.04.mat')
+A = load('D:\1-embed\3-Hardware_Test\test_flexforce\flexforce_precise\coef_4.04.mat')
 Fs = 30                         % Hz
 
-%%é€‰æ‹©ä¼ æ„Ÿå™¨å—
-a = [1 1];
+%%Ñ¡Ôñ´«¸ĞÆ÷¿é
+a = [4 4];
 row = a(1);
 col = a(2);
 
@@ -17,34 +17,34 @@ col = a(2);
 
 % % index = 1300:1800;
 index = 200:500
-%%æ•°æ®åŠ è½½
-normal = load('D:\1-embed\4-Serial_GUI\fig\2-subject1\girl_æ‰å¹³è¶³ï¼Œå†…å…«å­— 20190418T104147.mat');
-% index = 1400:2500; normal = load('C:\Users\xlh\Desktop\fig\subject2\girl_æ‰å¹³è¶³_20190507T093304.mat');
+%%Êı¾İ¼ÓÔØ
+normal = load('D:\1-embed\4-Serial_GUI\fig\2-subject1\girl_±âÆ½×ã£¬ÄÚ°Ë×Ö 20190418T104147.mat');
+% index = 1400:2500; normal = load('C:\Users\xlh\Desktop\fig\subject2\girl_±âÆ½×ã_20190507T093304.mat');
 
 
 figure(1);
 subplot 211
-plot(reshape(normal.data(row,col,:),1,size(normal.data,3)));                %%æ•°æ®å…¨æ™¯å›¾
+plot(reshape(normal.data(row,col,:),1,size(normal.data,3)));                %%Êı¾İÈ«¾°Í¼
 subplot 212
 plot(reshape(normal.after(row,col,:),1,size(normal.after,3)))
-title('æ•°æ®å…¨æ™¯å›¾')
+title('Êı¾İÈ«¾°Í¼')
 
 
 figure(3)
-plot(reshape(normal.data(row,col,index),1,length(index)));                  %%æ•°æ®indexé€‰æ‹©å›¾
+plot(reshape(normal.data(row,col,index),1,length(index)));                  %%Êı¾İindexÑ¡ÔñÍ¼
 hold on
-plot(reshape(normal.after(row,col,index),1,length(index)));                 %%æ»¤æ³¢æ•°æ®indexé€‰æ‹©å›¾
-legend('åŸå§‹æ•°æ®','æ»¤æ³¢åçš„æ•°æ®')
-title('æ•°æ®indexé€‰æ‹©å›¾')
+plot(reshape(normal.after(row,col,index),1,length(index)));                 %%ÂË²¨Êı¾İindexÑ¡ÔñÍ¼
+legend('Ô­Ê¼Êı¾İ','ÂË²¨ºóµÄÊı¾İ')
+title('Êı¾İindexÑ¡ÔñÍ¼')
 
 % normal.index = index;
 % % normal.fft = abs(fft(reshape(normal.data(row,col,index),1,length(index))))
 % figure(4)
-% plot(log10(abs(fft(reshape(normal.data(row,col,index),1,length(index))))))%%å‚…é‡Œå¶å˜åŒ–å¯¹æ•°å›¾
+% plot(log10(abs(fft(reshape(normal.data(row,col,index),1,length(index))))))%%¸µÀïÒ¶±ä»¯¶ÔÊıÍ¼
 % axis([1 inf 0 Inf])
 
 
-figure(4)                                                                   %%å‚…é‡Œå¶å˜åŒ–å¯¹æ•°å›¾
+figure(4)                                                                   %%¸µÀïÒ¶±ä»¯¶ÔÊıÍ¼
 
 normal.index = index;
 y = reshape(normal.data(row,col,index),1,length(index))-140;
@@ -52,27 +52,27 @@ y = y/A.A(a(1),a(2));
 y_after = reshape(normal.after(row,col,index),1,length(index))-140;
 y_after = y_after/A.A(a(1),a(2));
 
-NFFT = 2^nextpow2(length(normal.index));        % é¢‘ç‡å›¾çš„ç‚¹æ•°
-A = abs(fft(y,NFFT));                           % é¢‘åŸŸå¹…å€¼
-f = Fs/2*linspace(0, 1, NFFT/2);                % é‡‡æ ·ç‚¹æ•°å†³å®šäº†é¢‘ç‡åˆ†è¾¨åŠ›
+NFFT = 2^nextpow2(length(normal.index));        % ÆµÂÊÍ¼µÄµãÊı
+A = abs(fft(y,NFFT));                           % ÆµÓò·ùÖµ
+f = Fs/2*linspace(0, 1, NFFT/2);                % ²ÉÑùµãÊı¾ö¶¨ÁËÆµÂÊ·Ö±æÁ¦
 A_f = [A(1)  2*A(2:NFFT/2)];
 stem(f,A_f/NFFT,'.r');
-title('çœŸå®é¢‘è°±ï¼Œå¹…å€¼ä¸ºè¯¥é¢‘ç‡æ­£å¼¦æ³¢å¯¹åº”çš„å¹…å€¼')
+title('ÕæÊµÆµÆ×£¬·ùÖµÎª¸ÃÆµÂÊÕıÏÒ²¨¶ÔÓ¦µÄ·ùÖµ')
 
 hold on
-A = abs(fft(y_after,NFFT));                           % é¢‘åŸŸå¹…å€¼
-f = Fs/2*linspace(0, 1, NFFT/2);                %é‡‡æ ·ç‚¹æ•°å†³å®šäº†é¢‘ç‡åˆ†è¾¨åŠ›
+A = abs(fft(y_after,NFFT));                     % ÆµÓò·ùÖµ
+f = Fs/2*linspace(0, 1, NFFT/2);                %²ÉÑùµãÊı¾ö¶¨ÁËÆµÂÊ·Ö±æÁ¦
 A_f = [A(1)  2*A(2:NFFT/2)];
 stem(f,A_f/NFFT,'.b');
-title('çœŸå®æ»¤æ³¢åé¢‘è°±ï¼Œå¹…å€¼ä¸ºè¯¥é¢‘ç‡æ­£å¼¦æ³¢å¯¹åº”çš„å¹…å€¼')
+title('ÕæÊµÂË²¨ºóÆµÆ×£¬·ùÖµÎª¸ÃÆµÂÊÕıÏÒ²¨¶ÔÓ¦µÄ·ùÖµ')
 
 
-%% æ ‡å‡†åŒ–åçš„æ•°æ®
+%% ±ê×¼»¯ºóµÄÊı¾İ
 a = [5 3];
 row = a(1);
 col = a(2);
-A = load('D:\1-embed\3-ARDUINO\test_flexforce\flexforce_precise\coef_4.04.mat')
+A = load('D:\1-embed\3-Hardware_Test\test_flexforce\flexforce_precise\coef_4.04.mat')
 figure(10);
 % G = (normal.data(row,col,:)-140)/A.A(row,col)
 G = (normal.after(row,col,:)-140)/A.A(row,col)
-plot(reshape(G,1,size(normal.data,3)));                %%æ•°æ®å…¨æ™¯å›¾
+plot(reshape(G,1,size(normal.data,3)));                %%Êı¾İÈ«¾°Í¼

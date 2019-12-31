@@ -10,7 +10,12 @@ global AAA sum_col
 %   725 870 1147 1160 1185 1100 890 650;
 %   715 870 1145 1160 1185 1185 780 730];
 
-load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\AAA.mat');
+% 8,1 -> 7,1
+% 1,1 准确且无耦合，误差40以内，耦合误差40/400
+% 坏5,1  3,1  6,1/2 8,1/2 1/2..,8
+
+
+load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\AAAoffset.mat');
 load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\sum_col.mat');
 AAA
 sum_col
@@ -300,10 +305,7 @@ function ReceiveCallback( ~, ~,handles)
         avr = SUM/Avr;
         sample = reshape(avr,1,64);
         
-        sample = sample/sum(sample);
-%         for j = 1:Avr
-%            sample(j) =  sample(j)*100.0./sum_col(j);
-%         end
+        sample = sample*1000/sum(sample);
         
         result = Model_py(sample)                 % 返回字符结果
         set(handles.st, 'String', result);

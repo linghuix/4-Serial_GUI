@@ -29,6 +29,64 @@ import scipy.io as sio              # 读取数据包
 
 import pickle                       # pickle模块主要函数的应用举例 
 
+class Samlpes_result:
+    def __init__(self):
+        samples = []
+        num = 0
+        timecosts = []
+        precise_average = []
+        precise_variance = []
+    
+    """sample - list类型 横向为一个样本，最后一列为分类值"""
+    def addSample(self,sample):
+        self.samples.append(sample)
+        num += 1
+    
+    def compare(self,algorithm):
+        for i in range(0, num):# 0 - modelnum-1
+        
+            D = samples[i]
+            target_list = D.shape[1]-1       # target 为标签,Sample横向量为一个样本
+            target = D[:,target_list]
+            # print(target)                  # 目标分类值
+            Sample = D[:,:target_list]
+            # 划分训练集和测试集
+            X_train, X_test, y_train, y_test = train_test_split(Sample, target, test_size=0.3, random_state = 42)
+            
+            
+            algorithm.fit(X_train,y_train)
+            
+            # 预测时间的测试
+            time_start=time.time()
+            for iter in range(0, 10):
+                y_pred1 = a[i].predict(X_test);
+            time_end=time.time()
+            
+            # 模型的评价指标测试
+            this_scores = cross_val_score(a[i], Sample, target, cv = 10);
+            
+            self.timecosts.append((time_end-time_start)*1000/10) # ms
+            self.precise_average.append(this_scores.mean())
+            self.precise_variance.append(this_scores.std())
+    
+    def showmessage(self):
+        printf(self.timecosts,'\n',self.precise_average,'\n',self.precise_variance)
+        
+    def showplt_precise_average(self):
+        import matplotlib.pyplot as plt
+        plt.bar(range(self.num), self.precise_average,fc='r')
+        plt.show
+    
+    def showplt_precise_variance(self):
+        import matplotlib.pyplot as plt
+        plt.bar(range(self.num), self.precise_variance,fc='r')
+        plt.show
+        
+    def showplt_timecosts(self):
+        import matplotlib.pyplot as plt
+        plt.bar(range(self.num), self.timecosts,fc='r')
+        plt.show
+
 if __name__=="__main__":
 
 
@@ -47,8 +105,8 @@ if __name__=="__main__":
     print(int(pcaNum))
 
     # data = sio.loadmat('F:\\1-embed\\7-MATLAB\\调用外部程序调试\\matlab+python\\group.mat')
-    # data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features.mat')
-    data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features_cali.mat')
+    data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features-30.mat')
+    # data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features_cali.mat')
     D = data['group']   # array object
     print(D.shape)
 
@@ -97,9 +155,10 @@ if __name__=="__main__":
     pipe_NN2 = Pipeline([('lda' , transform_lda),  ('NN', clf_NN)])
     
     
-    a  = (pipe_svm1,pipe_svm2,pipe_svm3,pipe_svm5,pipe_tree1,pipe_tree2,pipe_lda,pipe_knn1,pipe_knn1,pipe_NN2);
-    name = ('pipe_svm1','pipe_svm2','pipe_svm3','pipe_svm5','pipe_tree1','pipe_tree2','pipe_lda','pipe_knn1','pipe_knn2','pipe_NN2')
-   
+    # a  = (pipe_svm1,pipe_svm2,pipe_svm3,pipe_svm4,pipe_svm5,pipe_tree1,pipe_tree2,pipe_lda,pipe_knn1,pipe_knn1,pipe_NN2);
+    a  = (pipe_svm1,pipe_svm2,pipe_svm3,pipe_svm4,pipe_svm5);
+    name = ('pipe_svm1','pipe_svm2','pipe_svm3','pipe_svm4','pipe_svm5','pipe_tree1','pipe_tree2','pipe_lda','pipe_knn1','pipe_knn2','pipe_NN2')
+    modelnum = 5;
     # 划分训练集和测试集
     X_train, X_test, y_train, y_test = train_test_split(Sample, target, test_size=0.3, random_state = 42)
     
@@ -111,22 +170,23 @@ if __name__=="__main__":
     
         # 表明正在测试的模型
         print('\n\n', name[i], ':')
-        if name[i] is not 'pipe_svm3':
-            a[i].fit(X_train,y_train)
-            
-            # 预测时间的测试
-            time_start=time.time()
+        # if name[i] is not 'pipe_svm3':
+        a[i].fit(X_train,y_train)
+        
+        # 预测时间的测试
+        time_start=time.time()
+        for iter in range(0, 10):
             y_pred1 = a[i].predict(X_test);
-            time_end=time.time()
-            print('time cost : ',(time_end-time_start)*1000,'ms')
-            
-            # 模型的评价指标测试
-            this_scores = cross_val_score(a[i], Sample, target, cv = 10);
-            print('十次交叉结果：',this_scores.view())
-            print('十次交叉结果均值：',this_scores.mean())
-            print('十次交叉方差值：',this_scores.std())
-            print(classification_report(y_test,y_pred1))
-            print(confusion_matrix(y_test, y_pred1))
+        time_end=time.time()
+        print('time cost : ',(time_end-time_start)*1000,'ms')
+        
+        # 模型的评价指标测试
+        this_scores = cross_val_score(a[i], Sample, target, cv = 10);
+        print('十次交叉结果：',this_scores.view())
+        print('十次交叉结果均值：',this_scores.mean())
+        print('十次交叉方差值：',this_scores.std())
+        print(classification_report(y_test,y_pred1))
+        print(confusion_matrix(y_test, y_pred1))
         
 
     # print('explained_variance_: ',pipe.named_steps['pca'].explained_variance_) 

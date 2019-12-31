@@ -24,91 +24,105 @@ import scipy.io as sio                              # 读取数据包
 
 import pickle                                       # pickle模块主要函数的应用举例 
 
+import Algori_Compare as my
 
 
 if __name__=="__main__":
-
+    
+    pcaNum     = 3  # 降维后的维度
+    ldaNum    = 1   # 训练数据量
+    cross_test = 0   # 是否需要十次交叉验证
+    save       =  0
+    cali       = 0
+    
+    """ 数据直接输入
     pcaNum     = int(sys.argv[1])   # 降维后的维度
     # tranNum    = int(sys.argv[2])   # 训练数据量
     cross_test = int(sys.argv[2])   # 是否需要十次交叉验证
     save       = int(sys.argv[3])
     cali       = int(sys.argv[4])
-
-    # print(int(pcaNum))
+    """
     
-    data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\data\\sample.mat')
+    
+    #data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\data\\sample.mat')
     if cali:
         data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features_cali.mat')
+    data = sio.loadmat('/mnt/Documents/1-embed/4-Serial_GUI/2-ARM小体积/static/data/sample.mat')
     
     D = data['sample']   # array object
-    # print('D.shape = ',D.shape)
-    
-    target_list = D.shape[1]-1       # target 为标签,Sample横向量为一个样本
-    
-    # 目标分类值
-    target = D[:,target_list]
-    # print(target)                  
-    
-    # 样本
-    Sample = D[:,:target_list]
     
     
     # as it creates all the possible training/test sets by removing p samples. from the complete set.
     SSlit = ShuffleSplit(n_splits=5, test_size=0.3)
     
+    
     # clf = svm.SVC(C=1.0, kernel='poly',degree = 3, gamma = 'auto')      # SVR 分类模型
-    clf = svm.SVC(kernel = 'linear',gamma = 'scale')
-    # transform = PCA(n_components = pcaNum)                              # 预处理降维器
-    transform = LinearDiscriminantAnalysis(n_components = pcaNum)       # 预处理降维器
-    pipe = Pipeline([('pca', transform), ('svc', clf)])                 # 管道        
+    
+    # 分类模型
+    clf_rbfsvm1 = svm.SVC(kernel = 'rbf',gamma = 'scale')
+    clf_linsvm2 = svm.SVC(kernel = 'linear',gamma = 'scale')
+    clf_lda  = LinearDiscriminantAnalysis(solver="svd", n_components=ldaNum, store_covariance=True,tol = 1.0e-4)
+    
+    # 降维模型
+    transform_pca = PCA(n_components = pcaNum)                              # 预处理降维器
+    transform_pca_lda = PCA(n_components = ldaNum)  
+    transform_lda = LinearDiscriminantAnalysis(n_components=ldaNum)       # 预处理降维器
+    
+    # 管道模型   降维模型+分类模型
+    
+    # 论文表格 4.2 中的序号
+    # N0.4
+    pipe_svm1 = Pipeline([('lda', transform_lda), ('svc', clf_rbfsvm1)])# 有 colinear 问题
+    # N0.3
+    pipe_svm2 = Pipeline([('lda', transform_lda), ('svc', clf_linsvm2)])
+    # N0.6
+    pipe_svm3 = Pipeline([('pca', transform_pca), ('svc', clf_linsvm2)])
+    # N0.5
+    pipe_svm4 = Pipeline([('pca', transform_pca_lda), ('svc', clf_linsvm2)])
+    # N0.7
+    pipe_svm5 = Pipeline([('pca', transform_pca), ('svc', clf_rbfsvm1)])
+    # N0.11
+    pipe_lda = Pipeline([('lda', clf_lda)])
+    print("模型初始化... ")
+    
+    # 类的初始化
+    cop = my.Algorithms_result(0)
+    
+    algorithm = [ pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm5, pipe_lda]
+    for algorithmIndex in range(len(algorithm)):
+        algori = algorithm[algorithmIndex]
+        print("添加算法", algori)
+        cop.addAlgorithm(algori) # array object
+    
+    target = D[:,-1]
+    feature = D[:,0:-1]
+    select= D[:,-1]==1
+    Newfeature = feature[select]
 
+    one = np.ones(len(Newfeature)-1000-800)
+    zero = np.zeros(1000)
+    two  = 2*np.ones(800)
+    
+    Newtarget = np.hstack((one,zero,two))
+    Newdata = np.hstack((Newfeature,Newtarget.reshape(len(Newtarget),1)))
+    #cop.compare(D)
+    cop.compare(Newdata)
 
-    # 划分训练集和测试集
-    X_train, X_test, y_train, y_test = train_test_split(Sample, target, test_size=0.3, random_state = 42)
-
-    """for train_index, test_index in SSlit.split(target):
-        pipe.fit(Sample[train_index],target[train_index])
-        break
-    """
-    pipe.fit(X_train, y_train);
+    # 计算和显示结果
+    cop.showmessage()
+    cop.showplt_precise_average()
+    cop.showplt_precise_variance()
+    cop.showplt_timecosts()
+    cop.showplt_precise_view()
+    
+    
     
     """
     print('explained_variance_: ',pipe.named_steps['pca'].explained_variance_) 
     print('explained_variance_ratio_: ',pipe.named_steps['pca'].explained_variance_ratio_) 
     """
     
-    y_pred = pipe.predict(X_test);
     
-    # 预测的分类数据
-   # plt.subplot(211)
-    plt.plot(y_pred ,c='r')
-    
-    # 实际的分类数据
-   # plt.subplot(212)
-    plt.plot(y_test ,c='b')
-    
-    plt.show()
-    
-
-    print(classification_report(y_test,y_pred))
-    print(confusion_matrix(y_test, y_pred))
-
-    
-    if cross_test:
-        this_scores = cross_val_score(pipe, Sample, target, cv = 10)
-        print('10次交叉验证：\n')
-        print('10次交叉验证的精确度',this_scores.view())
-        print('10次交叉验证的精确度平均值',this_scores.mean())
-        print('10次交叉验证的精确度方差',this_scores.std())
-        print('-----------------------------------------------')
-        
-        
-        this_scores = cross_val_score(pipe, Sample, target, cv = SSlit)
-        print('5随机划分训练集：\n')
-        print('随机交叉验证的精确度',this_scores.view())              
-        print('随机交叉验证的精确度平均值',this_scores.mean())
-        print('随机交叉验证的精确度方差',this_scores.std())
-
     if save:
         #使用dump()将数据序列化到文件中  
         fw = open('D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\tmp\\ModelFile.txt','wb')

@@ -26,11 +26,11 @@ import pickle                       # pickle模块主要函数的应用举例
 
 if __name__=="__main__":
 
-    pcaNum     = int(sys.argv[1])   # 降维后的维度
+    pcaNum     = 7   # 降维后的维度
     # tranNum    = int(sys.argv[2])   # 训练数据量
-    cross_test = int(sys.argv[2])   # 是否需要十次交叉验证
-    save       = int(sys.argv[3])
-    cali       = int(sys.argv[4])
+    cross_test = 1   # 是否需要十次交叉验证
+    save       = 0
+    cali       = 0
 
     # print(int(pcaNum))
     
@@ -106,7 +106,7 @@ if __name__=="__main__":
         # gkf.split(X, y, groups=group)
         gkf = GroupKFold(n_splits=11)
         for train, test in gkf.split(Sample, target, groups=group):
-            print("%s %s" % (train, test))
+            print("train-%s test-%s" % (group[train], group[test]))
         this_scores = cross_val_score(pipe, Sample, target,groups = group, cv = gkf)
         print('5随机划分训练集：\n')
         print('随机交叉验证的精确度',this_scores.view())              

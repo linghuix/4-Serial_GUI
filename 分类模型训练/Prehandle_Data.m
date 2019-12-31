@@ -57,7 +57,7 @@ for name_index = 1:length(name)
     
     dir_name = [dir char(name(name_index)) suffix]  % cell 转化为 char字符类型
     load(dir_name);                                 % 根据 name_index, 选择加载的数据集 normal
-    label = Label(name_index);                     % label 根据 name_index 变化
+    label = Label(name_index);                      % label 根据 name_index 变化
     
     sample = [];
     for i = normal.index(1):(normal.index(1)+length(normal.index))
@@ -75,7 +75,8 @@ for name_index = 1:length(name)
         Col = [7 7 7 7 7 6 6 6 5 5 4 4 4 3 3 1];
         merge_R = [8 7 7];
         merge_C = [2 1 2];
-
+        % merge 8,2 7,1 7,2 8,1 to one point
+        
 %           Row = [1]
 %           Col = [1]
         for row_col = 1:length(Row) 
@@ -97,17 +98,25 @@ for name_index = 1:length(name)
                 
             %%傅里叶系数计算
             NFFT = 2^nextpow2(n);                      % 频率图的点数
-            A = abs(fft(serial,NFFT));                           % 频域幅值
-            f = Fs/2*linspace(0, 1, NFFT/2);                            % 采样点数决定了频率分辨力
+            A = abs(fft(serial,NFFT));                 % 频域幅值
+            f = Fs/2*linspace(0, 1, NFFT/2);           % 采样点数决定了频率分辨力
             A_f = [A(1) 2*A(2:NFFT/2)]./NFFT;
             % stem(f,A_f/NFFT,'.b');
             
-%             temp = [A_f(f == 0) sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
-            temp = [sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
+            % temp = [A_f(f == 0) sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
+            fraction = 17;
+            temp = [];
+            for gg = 1:fraction
+               left =  10/fraction*(gg-1);
+               right = 10/fraction*gg;
+               temp = [temp sum(A_f(f>left & f<=right))];
+            end
+            
+            %temp = [sum(A_f(f>0 & f<=2)) sum(A_f(f>2 & f<=4)) sum(A_f(f>4 & f<=6)) sum(A_f(f>6 & f<=8)) sum(A_f(f>8 & f<=10))];
             coef = [coef temp];                                         % 多个传感器块串起来
         end
         
-        sample = [sample;coef label];
+        sample = [sample; coef label];
     end
     sample_size = size(sample)
     

@@ -1,8 +1,9 @@
 %{
-分析：
-1. 前脚掌的压力波动较小，后脚跟受力较大，波动剧烈
+处理原始数据，利用标定的传感器获取真实的足压数据到
+D:\\1-embed\\4-Serial_GUI\\fig\\calibration\\
 
 %}
+
 clear all
 clc
 

@@ -2,11 +2,11 @@
 clc;clear all
 
 NORMAL  = 0;
-ABNORMAL= 5;                % 不正常步态
+% ABNORMAL= 5;                % 不正常步态
 TOEIN   = 1;                % 足内旋
 TOEOUT  = 2;                % 足外旋
 PING    = 3;                % 扁平足
-GAO     = 4;                % 高弓足
+% GAO     = 4;                % 高弓足
 STATIC  = 6;
 
 % % load the original data ---- normal struct
@@ -22,7 +22,7 @@ lcaNum = 4;
 pcaNum = lcaNum;    % 降维后的维度  0.9898
 cross_test = 1; % 是否需要十次交叉验证
 
-%%
+%%---------------------------------------------------
 
 n = 2^8;        % 分类原始时域数据数据长度256
 N = 10;         % 0-10Hz
@@ -39,15 +39,16 @@ Label = [NORMAL NORMAL NORMAL NORMAL NORMAL...
         TOEIN TOEIN TOEIN TOEOUT TOEOUT TOEOUT TOEOUT...
         STATIC STATIC...
         PING PING PING PING PING PING PING];
-        
+
+%     数据所属的人的编号
 individual = [1 1 1 1 2 ...
             3 4 4 ...
             5 5 6 6 ...
             7 8 ...
             9 9 9 10 10 11 11];
 
-group_individual = []   %记录数据对应的人的编号
-group = [];     % 训练数据
+group_individual = []   % 记录数据对应的人的编号
+group = [];             % 训练数据
 for name_index = 1:length(name)
     
     this_individual =[];
@@ -55,7 +56,7 @@ for name_index = 1:length(name)
     
     dir_name = [dir char(name(name_index)) suffix]  % cell 转化为 char字符类型
     load(dir_name);                                 % 根据 name_index, 选择加载的数据集 normal
-    label = Label(name_index);                     % label 根据 name_index 变化
+    label = Label(name_index);                      % label 根据 name_index 变化
 
     sample = [];
     for i = normal.index(1):(normal.index(1)+length(normal.index))
@@ -95,8 +96,8 @@ for name_index = 1:length(name)
                 
             %%傅里叶系数计算
             NFFT = 2^nextpow2(n);                      % 频率图的点数
-            A = abs(fft(serial,NFFT));                           % 频域幅值
-            f = Fs/2*linspace(0, 1, NFFT/2);                            % 采样点数决定了频率分辨力
+            A = abs(fft(serial,NFFT));                 % 频域幅值
+            f = Fs/2*linspace(0, 1, NFFT/2);            % 采样点数决定了频率分辨力
             A_f = [A(1) 2*A(2:NFFT/2)]./NFFT;
             % stem(f,A_f/NFFT,'.b');
             
@@ -111,7 +112,7 @@ for name_index = 1:length(name)
     
     sample_size = size(sample,1)
     this_individual = ones(1, sample_size)*gro;
-    group_individual = [group_individual , this_individual];
+    group_individual = [group_individual , this_individual];    % 添加group编号
 end
 
 group_size = size(group)

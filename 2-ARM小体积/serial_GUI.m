@@ -1147,9 +1147,9 @@ function showfigure_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of showfigure
 
-global data h2
+    global data h2
 
-figure(5)
+    figure(5)
     [x,y] = getpoints(h2);
     loops = size(x,2)
     F(loops) = struct('cdata',[],'colormap',[]);
