@@ -34,17 +34,40 @@ sys.path.append(r'D:\1-embed\4-Serial_GUI\分类模型训练\module')
 import Algori_Compare as my
 
 
+# 阈值预测函数
+# 通过阈值得到不同的分类结果函数
+def thresMethod(sample, list) :
+    
+    # label 2
+    if( (2.5>sample[5]>1.75 or 0.97>sample[5]>0.56) and (2.43>sample[60]>1.16) ) :
+        list.append(2)
+        return
+    
+    # label 0
+    if ( (4>sample[5] >2.68 or 2.42>sample[5] >2.21 or 1.09>sample[5]>0.775) and (1.06<sample[35]<1.67 or 2.21<sample[35]<2.7) ) :
+        list.append(0)
+        return
+    
+    # label 1
+    if ( 1.21<sample[5] < 1.78 ) :
+        list.append(1)
+        return
+    
+    # label 3
+    return list.append(3)
+    
+
 """
 相同样本，不同的算法之间的分类精度比较。
 """
-        
+
 if __name__=="__main__":
-
-
-    pcaNum     = 7  # 降维后的维度
-    ldaNum    = 4   # 训练数据量
+    
+    pcaNum     = 7   # 降维后的维度
+    ldaNum     = 4   # 训练数据量
     cross_test = 0   # 是否需要十次交叉验证
     save       =  0
+    
     
     """
     pcaNum     = int(sys.argv[1])   # 降维后的维度
@@ -61,12 +84,13 @@ if __name__=="__main__":
     clf_knn  =neighbors.KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='auto', leaf_size=1, p=2 ,metric='minkowski', metric_params=None)
     clf_NN = MLPClassifier(hidden_layer_sizes=(10,), activation='logistic', solver='lbfgs', alpha=0.0001, batch_size='auto', learning_rate='adaptive', max_iter=200,tol=0.0001, verbose=True, warm_start=False, nesterovs_momentum=True)
     
+    
     # 降维模型
     transform_pca = PCA(n_components = pcaNum)                              # 预处理降维器
     transform_pca_lda = PCA(n_components = ldaNum)  
     transform_lda = LinearDiscriminantAnalysis(n_components=ldaNum)       # 预处理降维器
-
-
+    
+    
     # 管道模型   降维模型+分类模型
     
     # 论文表格 4.2 中的序号
@@ -95,25 +119,31 @@ if __name__=="__main__":
     
     
     # 类的初始化
-    result = my.Algorithms_result()
+    result = my.Multithreshold_result(0)
     
-    # algorithm = [pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm4, pipe_svm5, transform_lda]
-    algorithm = [pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm5]
-    # algorithm = [ pipe_svm2]
-    for algorithmIndex in range(len(algorithm)):
-        algori = algorithm[algorithmIndex]
-        result.addAlgorithm(algori) # array object
-        
-        
+    # 数据载入和预处理
     dir = '.\\tmp\\features-5.mat'
     data = sio.loadmat(dir)
-    skf = StratifiedKFold(n_splits=10)
-    result.compare(data['group'], skf, 0)
-        
-    # 计算和显示结果
-    result.showmessage()
-    result.showplt_precise_average()
-    result.showplt_precise_variance()
-    result.showplt_timecosts()
+    data = data['group']
+    ad = data[:,-1]
+    select = (ad != 6)
+    samples = data[select]
+    
+    # 划分方法
+    skf  = StratifiedKFold(n_splits=10)
+    
+    # 添加阈值预测方法
+    result.addThresMethod(thresMethod)
+    
+    # 肉眼观察 get threshold 
+    index = [5,25,35,45,55, 60, 30, 3]# -30
+    train_data = result.getthreshold(samples, skf, index)
+    result.threshold_evaluate(train_data)
+    
+    # 预测
+    good = result.compare(samples, skf, 0)
+    
+    # 结果
     result.showplt_precise_view()
-
+    result.showplt_timecosts()
+    result.showmessage()

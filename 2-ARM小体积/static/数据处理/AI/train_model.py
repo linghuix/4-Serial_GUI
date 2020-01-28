@@ -9,7 +9,9 @@ from sklearn import svm
 
 from sklearn.model_selection import LeavePOut,ShuffleSplit
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
+
 
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -24,15 +26,16 @@ import scipy.io as sio                              # 读取数据包
 
 import pickle                                       # pickle模块主要函数的应用举例 
 
+sys.path.append(r'D:\1-embed\4-Serial_GUI\分类模型训练\module')
 import Algori_Compare as my
 
 
 if __name__=="__main__":
     
-    pcaNum     = 3  # 降维后的维度
-    ldaNum    = 1   # 训练数据量
+    pcaNum     = 7   # 降维后的维度
+    ldaNum     = 3   # 训练数据量
     cross_test = 0   # 是否需要十次交叉验证
-    save       =  0
+    save       = 0
     cali       = 0
     
     """ 数据直接输入
@@ -43,13 +46,6 @@ if __name__=="__main__":
     cali       = int(sys.argv[4])
     """
     
-    
-    #data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\data\\sample.mat')
-    if cali:
-        data = sio.loadmat('D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features_cali.mat')
-    data = sio.loadmat('/mnt/Documents/1-embed/4-Serial_GUI/2-ARM小体积/static/data/sample.mat')
-    
-    D = data['sample']   # array object
     
     
     # as it creates all the possible training/test sets by removing p samples. from the complete set.
@@ -88,25 +84,38 @@ if __name__=="__main__":
     # 类的初始化
     cop = my.Algorithms_result(0)
     
-    algorithm = [ pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm5, pipe_lda]
+    algorithm = [ pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm5]
+    
     for algorithmIndex in range(len(algorithm)):
         algori = algorithm[algorithmIndex]
         print("添加算法", algori)
         cop.addAlgorithm(algori) # array object
     
-    target = D[:,-1]
-    feature = D[:,0:-1]
-    select= D[:,-1]==1
-    Newfeature = feature[select]
-
-    one = np.ones(len(Newfeature)-1000-800)
-    zero = np.zeros(1000)
-    two  = 2*np.ones(800)
     
-    Newtarget = np.hstack((one,zero,two))
-    Newdata = np.hstack((Newfeature,Newtarget.reshape(len(Newtarget),1)))
-    #cop.compare(D)
-    cop.compare(Newdata)
+    # data = sio.loadmat('/mnt/Documents/1-embed/4-Serial_GUI/2-ARM小体积/static/data/sample.mat') # linux
+    data = sio.loadmat(r'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\sample5.mat')         # windows
+    
+    D = data['sample']   # array object
+    
+    
+    # 提取分类标签为 1 的数据，任意赋予 1,2,3 三个标签，进行分类，发现十次交叉的结果仍然有 80% 的平均精度，但是单独看待每一次检测，发现最低处于 50%-60% . 说明异常值也是有一定的分析价值的。
+    # target = D[:,-1]
+    # feature = D[:,0:-1]
+    # select= D[:,-1]==1
+    # Newfeature = feature[select]
+
+    # one = np.ones(len(Newfeature)-1000-800)
+    # zero = np.zeros(1000)
+    # two  = 2*np.ones(800)
+    
+    # Newtarget = np.hstack((one,zero,two))
+    # Newdata = np.hstack((Newfeature,Newtarget.reshape(len(Newtarget),1)))
+    
+    
+    
+    #cop.compare(D)     
+    skf = StratifiedKFold(n_splits=10)
+    cop.compare(D, skf)
 
     # 计算和显示结果
     cop.showmessage()
@@ -116,12 +125,11 @@ if __name__=="__main__":
     cop.showplt_precise_view()
     
     
-    
     """
     print('explained_variance_: ',pipe.named_steps['pca'].explained_variance_) 
     print('explained_variance_ratio_: ',pipe.named_steps['pca'].explained_variance_ratio_) 
     """
-    
+    cop.save(1,"D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\tmp\\ModelFile.txt")
     
     if save:
         #使用dump()将数据序列化到文件中  
@@ -130,7 +138,8 @@ if __name__=="__main__":
         if cali:
             fw = open('D:\\1-embed\\4-Serial_GUI\\2-ARM小体积\\static\\tmp\\ModelFile_cali.txt','wb')  
         
-        # Pickle the list using the highest protocol available.  
+        # 选择最优的一个模型进行保存
         pickle.dump(pipe, fw, -1)  
         fw.close()
         print('保存成功！')
+        

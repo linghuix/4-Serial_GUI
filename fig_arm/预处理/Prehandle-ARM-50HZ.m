@@ -5,21 +5,21 @@
 2. 选择比较完整的足底压力曲线 index 段，将normal保存到本地，该结构体包括 采集时曲线显示数据y，滤波数据after，原始数据data，index数据
 %}
 
-A = load('D:\1-embed\3-ARDUINO\test_flexforce\flexforce_precise\coef_4.04.mat');
+% A = load('D:\1-embed\3-ARDUINO\test_flexforce\flexforce_precise\coef_4.04.mat');
 Fs = 50;                         % Hz
 
 cd 'D:\1-embed\4-Serial_GUI\fig_arm'
 
 %%选择传感器块
-a = [5 5];
+a = [1 2];
 row = a(1);
 col = a(2);
 
-index = 100:1200;
+index = 300:1600;
 
 %%数据加载
-normal = load('D:\1-embed\4-Serial_GUI\fig_arm\Small_50Hz_fig\nor_20190919T151612.mat');
-
+% normal = load('D:\1-embed\4-Serial_GUI\fig_arm\Small_50Hz_fig\nor_20190919T151612.mat');
+normal = load('D:\1-embed\4-Serial_GUI\fig_arm\Small_50Hz_fig\toe out_20200105T171031.mat');
 
 figure(1);
 subplot 211
@@ -37,7 +37,6 @@ legend('原始数据','滤波后的数据')
 title('数据index选择图')
 
 
-
 figure(4)                                                                   %%傅里叶变化对数图
 
 normal.index = index;
@@ -51,8 +50,9 @@ A_f = [A(1)  2*A(2:NFFT/2)];
 stem(f,A_f/NFFT,'.r');
 title('真实频谱，幅值为该频率正弦波对应的幅值')
 
+
 hold on
-A = abs(fft(y_after,NFFT));                           % 频域幅值
+A = abs(fft(y_after,NFFT));                     % 频域幅值
 f = Fs/2*linspace(0, 1, NFFT/2);                %采样点数决定了频率分辨力
 A_f = [A(1)  2*A(2:NFFT/2)];
 stem(f,A_f/NFFT,'.b');

@@ -6,6 +6,9 @@ import numpy as np
 
 import pickle              # pickle模块主要函数的应用举例 
 
+"""
+    使用方法 python model.py "feature 0.00566178,0.00381959,0.00246555,..."
+"""
 if __name__=="__main__":
     
     ## 将字符串分离为数组

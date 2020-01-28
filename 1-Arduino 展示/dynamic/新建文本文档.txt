@@ -1,0 +1,157 @@
+训练特征 80
+sample 0 特征向量长度： 80
+classification_report : 
+               precision    recall  f1-score   support
+
+         0.0       1.00      1.00      1.00       603
+         1.0       1.00      1.00      1.00       467
+         2.0       1.00      1.00      1.00       702
+         3.0       1.00      1.00      1.00       342
+         6.0       1.00      1.00      1.00       276
+
+    accuracy                           1.00      2390
+   macro avg       1.00      1.00      1.00      2390
+weighted avg       1.00      1.00      1.00      2390
+
+confusion_matrix : 
+ [[603   0   0   0   0]
+ [  0 467   0   0   0]
+ [  0   0 702   0   0]
+ [  0   0   0 342   0]
+ [  0   0   0   0 276]] 
+
+
+
+Algorithms_result -compare- 算法： Pipeline(memory=None,
+         steps=[('lda',
+                 LinearDiscriminantAnalysis(n_components=4, priors=None,
+                                            shrinkage=None, solver='svd',
+                                            store_covariance=False,
+                                            tol=0.0001)),
+                ('svc',
+                 SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+                     decision_function_shape='ovr', degree=3, gamma='scale',
+                     kernel='rbf', max_iter=-1, probability=False,
+                     random_state=None, shrinking=True, tol=0.001,
+                     verbose=False))],
+         verbose=False)
+sample 1 特征向量长度： 80
+classification_report : 
+               precision    recall  f1-score   support
+
+         0.0       1.00      1.00      1.00       603
+         1.0       1.00      1.00      1.00       467
+         2.0       1.00      1.00      1.00       702
+         3.0       1.00      1.00      1.00       342
+         6.0       1.00      1.00      1.00       276
+
+    accuracy                           1.00      2390
+   macro avg       1.00      1.00      1.00      2390
+weighted avg       1.00      1.00      1.00      2390
+
+confusion_matrix : 
+ [[603   0   0   0   0]
+ [  0 467   0   0   0]
+ [  0   0 702   0   0]
+ [  0   0   0 342   0]
+ [  0   0   0   0 276]] 
+
+
+
+Algorithms_result -compare- 算法： Pipeline(memory=None,
+         steps=[('lda',
+                 LinearDiscriminantAnalysis(n_components=4, priors=None,
+                                            shrinkage=None, solver='svd',
+                                            store_covariance=False,
+                                            tol=0.0001)),
+                ('svc',
+                 SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+                     decision_function_shape='ovr', degree=3, gamma='scale',
+                     kernel='linear', max_iter=-1, probability=False,
+                     random_state=None, shrinking=True, tol=0.001,
+                     verbose=False))],
+         verbose=False)
+sample 2 特征向量长度： 80
+classification_report : 
+               precision    recall  f1-score   support
+
+         0.0       0.96      0.96      0.96       603
+         1.0       1.00      1.00      1.00       467
+         2.0       0.95      0.96      0.95       702
+         3.0       0.98      0.97      0.97       342
+         6.0       1.00      1.00      1.00       276
+
+    accuracy                           0.97      2390
+   macro avg       0.98      0.98      0.98      2390
+weighted avg       0.97      0.97      0.97      2390
+
+confusion_matrix : 
+ [[577   0  26   0   0]
+ [  0 467   0   0   0]
+ [ 21   0 674   7   0]
+ [  0   0  11 331   0]
+ [  0   0   0   0 276]] 
+
+
+
+Algorithms_result -compare- 算法： Pipeline(memory=None,
+         steps=[('pca',
+                 PCA(copy=True, iterated_power='auto', n_components=7,
+                     random_state=None, svd_solver='auto', tol=0.0,
+                     whiten=False)),
+                ('svc',
+                 SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+                     decision_function_shape='ovr', degree=3, gamma='scale',
+                     kernel='linear', max_iter=-1, probability=False,
+                     random_state=None, shrinking=True, tol=0.001,
+                     verbose=False))],
+         verbose=False)
+sample 3 特征向量长度： 80
+classification_report : 
+               precision    recall  f1-score   support
+
+         0.0       1.00      0.99      0.99       603
+         1.0       1.00      1.00      1.00       467
+         2.0       0.99      1.00      0.99       702
+         3.0       1.00      1.00      1.00       342
+         6.0       1.00      1.00      1.00       276
+
+    accuracy                           1.00      2390
+   macro avg       1.00      1.00      1.00      2390
+weighted avg       1.00      1.00      1.00      2390
+
+confusion_matrix : 
+ [[595   0   8   0   0]
+ [  0 467   0   0   0]
+ [  0   0 702   0   0]
+ [  0   0   0 342   0]
+ [  0   0   0   0 276]] 
+
+
+
+Algorithms_result -compare- 算法： Pipeline(memory=None,
+         steps=[('pca',
+                 PCA(copy=True, iterated_power='auto', n_components=7,
+                     random_state=None, svd_solver='auto', tol=0.0,
+                     whiten=False)),
+                ('svc',
+                 SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+                     decision_function_shape='ovr', degree=3, gamma='scale',
+                     kernel='rbf', max_iter=-1, probability=False,
+                     random_state=None, shrinking=True, tol=0.001,
+                     verbose=False))],
+         verbose=False)
+Algorithms_result -compare- timecosts :  [7.000398635864258, 3.000164031982422, 18.201065063476562, 40.40226936340332] 
+ precise_average :  [0.9849713303926354, 0.9822175760972737, 0.9049617844965872, 0.9367340709179505] 
+
+Algorithms_result -compare- precise view [array([0.89612015, 1.        , 0.96992481, 0.99874372, 0.98492462,
+       1.        , 1.        , 1.        , 1.        , 1.        ]), array([0.87359199, 1.        , 0.96365915, 0.99623116, 0.98869347,
+       1.        , 1.        , 1.        , 1.        , 1.        ]), array([0.70713392, 0.84355444, 0.92606516, 0.87311558, 0.95477387,
+       0.90577889, 0.86306533, 0.97613065, 1.        , 1.        ]), array([0.73717146, 0.8485607 , 0.9197995 , 1.        , 0.95728643,
+       0.90577889, 1.        , 0.99874372, 1.        , 1.        ])]
+Algorithms_result -compare- precise_variance [0.031089831549805554, 0.03778827648616635, 0.08469534661443563, 0.08314005466911914]
+
+------------------------------------------------CTM-------------------------------
+
+
+

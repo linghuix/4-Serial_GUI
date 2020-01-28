@@ -320,8 +320,6 @@ function ReceiveCallback( ~, ~,handles)
         set(handles.st, 'String', result);
     end
 
-
-
     
 % --- Executes on selection change in popCOM.
 function popCOM_Callback(hObject, ~, ~)

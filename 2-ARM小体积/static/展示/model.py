@@ -26,5 +26,6 @@ if __name__=="__main__":
     # print(clf)
     
     ## 预测
+    print(data.reshape(1,-1).shape)
     result = clf.predict(data.reshape(1,-1))
     print(result)

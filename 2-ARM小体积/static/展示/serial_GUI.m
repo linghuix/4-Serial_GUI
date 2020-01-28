@@ -12,8 +12,13 @@ global AAA sum_col
 
 % 8,1 -> 7,1
 % 1,1 准确且无耦合，误差40以内，耦合误差40/400
-% 坏5,1  3,1  6,1/2 8,1/2 1/2..,8
-
+% 19.12.27    坏5,1	3,1   6,1/2   8,1/2   1/2..,8    原因是8x8传感器整列连接处虚焊
+% 19.12.31    存在耦合的传感器块 2,1   4,1   5,1	
+%             5,1   6,1   7,1   8,1坏了
+% 19.1.1    8,1  1,1..8 接高抗干扰电路有压降，输入0.45输出0.38
+%     7,1与8,1类似
+%         6,1
+%         5,6行很有问题
 
 load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\AAAoffset.mat');
 load('D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\sum_col.mat');
@@ -240,7 +245,7 @@ function OpenSerial_Callback(~, ~,handles)
     fprintf('打开串口: %s \n',s.Port);
     
     % ASCII码形式发送
-    fwrite(s,'start','char');
+    fwrite(s,'t','char');
  
         
 
@@ -469,7 +474,7 @@ function CloseSerial_Callback(~, ~, handles)
     % handles    structure with handles and user data (see GUIDATA)
     global s COM
     
-    fwrite(s,'close','char');
+    fwrite(s,'e','char');
     
     fclose(s);
     delete(s);
@@ -767,7 +772,7 @@ function SaveData_Callback(~, ~, handles)
     time = toc;
     [x,y] = getpoints(h);
     save( strcat([savename '_' datestr(now,30)],'.mat'),'data','after','y');
-    set(handles.st,'String','保存成功＿');
+    set(handles.st,'String','保存成功＿  见D:\1-embed\4-Serial_GUI\fig_arm\Small_50Hz_fig');
     cd 'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\展示'
 
 
@@ -1133,14 +1138,19 @@ global h2 AAA after
 figure(5)
 
     [x,y] = getpoints(h2);
+    x,y
     loops = size(x,2)
     
-    for j = 1:10:loops
-        fprintf('frame %d\n',round(j));
-        imshow(imresize(after(:,:,j)-AAA,50,'nearest'),[-10 200]); 
+%     for j = 1:1:loops
+%         % fprintf('frame %d\n',round(j));
+%         imshow(imresize(after(:,:,j)-AAA,50,'nearest'),[100 300]); 
+%         drawnow limitrate         
+%     end
+    for j = 1:5:loops
+%         fprintf('frame %d\n',round(j));
+        imshow(imresize(after(:,:,j),50,'nearest'),[00 500]); 
         drawnow limitrate         
     end
-
 close figure 5
 
 

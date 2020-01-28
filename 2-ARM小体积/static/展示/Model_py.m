@@ -20,7 +20,7 @@ for i = 2:length(feature)
      s = strcat(s,',', s_feature(i));                       % 得到的s是一个cell，所以下文必须用char()转化为字符
 end
 
-command = sprintf('python model.py "%s"',char(s)); 
+command = sprintf('python model.py "%s"',char(s))
 
 % cmdout，收集所有的cmd窗口的输出，为字符串格式
 [status,cmdout] = system(command)                          % 等待python执行完毕

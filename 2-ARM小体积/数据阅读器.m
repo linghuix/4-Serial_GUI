@@ -1,6 +1,23 @@
 clear all
 
-%% 静态数据图像化阅读器
+%% 新版本静态数据图像化阅读器，不需要减去偏移量AAA
+
+%%数据加载
+load('D:\1-embed\4-Serial_GUI\fig_arm\Toein-200105-1.mat')
+
+offset = zeros(8,8);
+% offset(1:4,5:6)=700
+% offset(5,5:6)=700
+% offset(6,5:6)=700
+for i = normal.index  % normal.index 选择需要播放的帧区间
+    %   400,600,750,1100,1300,1400
+    imshow(imresize(normal.after(:,:,i)-offset,50,'box'),[00 100]); 
+    %   bilinear/bicubic/nearest/box/lanczos2/lanczos3
+    drawnow limitrate
+    i
+end
+
+%% 旧版数据采集器的静态数据图像化阅读器，需要减去偏移量AAA
 AAA = [
   660+300 570+300 1050 1160 1180 1180 895-100 730+50;
   650+300 570+300 1080 1150-200 1180 1180 890-100 723+50;
@@ -14,13 +31,16 @@ AAA = [
 
 %%数据加载
 % load('D:\1-embed\4-Serial_GUI\fig_arm\Toeout-3.mat')%[50 500]
-load('D:\1-embed\4-Serial_GUI\fig_arm\Toein-2.mat')
+% load('D:\1-embed\4-Serial_GUI\fig_arm\normal-1.mat')%[600 700]
 % load('D:\1-embed\4-Serial_GUI\fig_arm\normal-111.mat')%[80 400]
 
+% load('D:\1-embed\4-Serial_GUI\fig_arm\Toein-11.mat') 比较好
+load('D:\1-embed\4-Serial_GUI\fig_arm\Toeout-222.mat') % 比较好
 
-for i = [600:800]   % normal.index 选择需要播放的帧区间
-    
-    imshow(imresize(normal.after(:,:,i)-AAA+30*rand(8,8),20,'box'),[50 400]); 
+
+for i = normal.index   % normal.index 选择需要播放的帧区间
+   
+    imshow(imresize(normal.after(:,:,i)-AAA+30*rand(8,8),50,'box'),[0 400]); 
     %bilinear/bicubic/nearest/box/lanczos2/lanczos3
     
     drawnow limitrate

@@ -33,18 +33,45 @@ import pickle                                       # pickle模块主要函数�
 sys.path.append(r'D:\1-embed\4-Serial_GUI\分类模型训练\module')
 import Algori_Compare as my
 
-
+# 阈值预测函数
+# 通过阈值得到不同的分类结果函数
+def thresMethod(sample, list) :
+    
+    # label 0
+    # if( (sample[4+(2-1)*8] > 17 or 14<sample[4+(2-1)*8]<14.8) and (14.3 < sample[5+(2-1)*8] < 14.8 or 17.9 < sample[5+(2-1)*8] < 18.6) and 19.7<sample[2+(5-1)*8]<21.3 and 17.8<sample[6+(6-1)*8]<19.2 and (18.5<sample[2+(4-1)*8]<19.5 or 14.51<sample[2+(4-1)*8]<14.84 or 15.47<sample[2+(4-1)*8]<15.55) and (17<sample[2+5*8]<18.5 or 19.1<sample[2+5*8]<20) ) :
+        # list.append(0)
+        # return
+    
+    # label 1
+    # if ( (13.37<sample[3+1*8]<14.78 or 14.32<sample[3+1*8]<14.525) and 13.35<sample[5+1*8]<15 and (13.2<sample[2+3*8]<17.69) and (19.46<sample[2+4*8]<22.28) and(18.79<sample[3+5*8]<21.6) and (18.62<sample[6+5*8]<21.2) ) :
+        # list.append(1)
+        # return
+    
+    # label 0
+    if( (sample[12] > 17 or 14<sample[12]<14.8) and (14.3 < sample[13] < 14.8 or 17.9 < sample[13] < 18.6) and 19.7<sample[34]<21.3 and 17.8<sample[46]<19.2 and (18.5<sample[26]<19.5 or 14.51<sample[26]<14.84 or 15.47<sample[26]<15.55) and (17<sample[42]<18.5 or 19.1<sample[42]<20) ) :
+        list.append(0)
+        return
+    
+    # label 1
+    if ( (13.37<sample[11]<14.78 or 14.32<sample[11]<14.525) and 13.35<sample[13]<15 and (13.2<sample[26]<17.69) and (19.46<sample[34]<22.28) and(18.79<sample[43]<21.6) and (18.62<sample[46]<21.2) ) :
+        list.append(1)
+        return
+        
+    return list.append(2)
+    
+    
 """
+人体站立下的足外翻、足内翻、正常的分类
 相同样本，不同的算法之间的分类精度比较。
 """
-        
+
 if __name__=="__main__":
-
-
-    pcaNum     = 7  # 降维后的维度
-    ldaNum    = 4   # 训练数据量
+    
+    pcaNum     = 7   # 降维后的维度
+    ldaNum     = 4   # 训练数据量
     cross_test = 0   # 是否需要十次交叉验证
-    save       =  0
+    save       = 0
+    
     
     """
     pcaNum     = int(sys.argv[1])   # 降维后的维度
@@ -61,12 +88,13 @@ if __name__=="__main__":
     clf_knn  =neighbors.KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='auto', leaf_size=1, p=2 ,metric='minkowski', metric_params=None)
     clf_NN = MLPClassifier(hidden_layer_sizes=(10,), activation='logistic', solver='lbfgs', alpha=0.0001, batch_size='auto', learning_rate='adaptive', max_iter=200,tol=0.0001, verbose=True, warm_start=False, nesterovs_momentum=True)
     
+    
     # 降维模型
     transform_pca = PCA(n_components = pcaNum)                              # 预处理降维器
     transform_pca_lda = PCA(n_components = ldaNum)  
     transform_lda = LinearDiscriminantAnalysis(n_components=ldaNum)       # 预处理降维器
-
-
+    
+    
     # 管道模型   降维模型+分类模型
     
     # 论文表格 4.2 中的序号
@@ -95,25 +123,29 @@ if __name__=="__main__":
     
     
     # 类的初始化
-    result = my.Algorithms_result()
+    result = my.Multithreshold_result(0)
     
-    # algorithm = [pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm4, pipe_svm5, transform_lda]
-    algorithm = [pipe_svm1, pipe_svm2, pipe_svm3, pipe_svm5]
-    # algorithm = [ pipe_svm2]
-    for algorithmIndex in range(len(algorithm)):
-        algori = algorithm[algorithmIndex]
-        result.addAlgorithm(algori) # array object
-        
-        
-    dir = '.\\tmp\\features-5.mat'
+    
+    # 数据载入
+    dir  = r'D:\1-embed\4-Serial_GUI\2-ARM小体积\static\data\sample5.mat'
     data = sio.loadmat(dir)
-    skf = StratifiedKFold(n_splits=10)
-    result.compare(data['group'], skf, 0)
-        
-    # 计算和显示结果
-    result.showmessage()
-    result.showplt_precise_average()
-    result.showplt_precise_variance()
-    result.showplt_timecosts()
+    data = data['sample']
+    
+    # 划分方法
+    skf  = StratifiedKFold(n_splits=10)
+    
+    # 添加阈值预测方法
+    result.addThresMethod(thresMethod)
+    
+    # 肉眼观察 get threshold 
+    index = [5+(5-1)*8, 6+(6-1)*8, 3+(2-1)*8, 4+(2-1)*8, 5+(2-1)*8,2+(4-1)*8, 2+(5-1)*8, 2+(6-1)*8, 3+(6-1)*8]
+    train_data = result.getthreshold(data, skf, index)
+    result.threshold_evaluate(train_data)
+    
+    # 预测
+    good = result.compare(data, skf, 0)
+    
+    # 结果
     result.showplt_precise_view()
-
+    result.showplt_timecosts()
+    result.showmessage()

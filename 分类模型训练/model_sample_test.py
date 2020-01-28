@@ -29,6 +29,9 @@ import scipy.io as sio              # 读取数据包
 
 import pickle                       # pickle模块主要函数的应用举例 
 
+sys.path.append(r'D:\1-embed\4-Serial_GUI\分类模型训练\module')
+import Algori_Compare as my
+
 """
 相同算法，同样对象，不同的样本下的分类精度比较。
 """
@@ -166,8 +169,7 @@ class Samlpes_result:
 
 
 if __name__=="__main__":
-
-
+    
     pcaNum     = 7  # 降维后的维度
     ldaNum    = 4   # 训练数据量
     cross_test = 0   # 是否需要十次交叉验证
@@ -181,7 +183,7 @@ if __name__=="__main__":
     """
     
     # 类的初始化
-    result = Samlpes_result()
+    result = my.Samlpes_result()
     # dir = 'D:\\1-embed\\4-Serial_GUI\\分类模型训练\\tmp\\features-'
     dir = './tmp/features-'
     type = '.mat'
